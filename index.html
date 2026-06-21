@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Agri Kendra Calculator</title>
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00796b">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <!-- Google Material Icons & Outfit Font -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00796b;
+            --primary-dark: #004d40;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-light: #666666;
+            --danger: #dc3545;
+            --success: #28a745;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            color: var(--text-main);
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--bg-color);
+            min-height: 100vh;
+            position: relative;
+            padding-bottom: 70px;
+            /* Space for bottom nav */
+            box-sizing: border-box;
+        }
+
+        /* Header */
+        .header {
+            background-color: var(--primary);
+            color: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        /* Content Sections */
+        .section {
+            display: none;
+            padding: 16px;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* Cards & Forms */
+        .card {
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-floating {
+            position: relative;
+            margin-bottom: 16px;
+        }
+        .form-floating input {
+            width: 100%;
+            padding: 18px 12px 6px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: transparent;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        .form-floating input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(0, 121, 107, 0.1);
+        }
+        .form-floating label {
+            position: absolute;
+            top: 50%;
+            left: 12px;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            pointer-events: none;
+            transition: all 0.3s ease;
+            padding: 0;
+            font-weight: 500;
+            margin: 0;
+        }
+        .form-floating input:focus ~ label,
+        .form-floating input:not(:placeholder-shown) ~ label {
+            top: 0;
+            font-size: 12px;
+            color: var(--primary);
+            background: var(--card-bg);
+            padding: 0 4px;
+        }
+
+        /* Buttons */
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.96);
+        }
+        button:hover {
+            box-shadow: 0 4px 12px rgba(0, 121, 107, 0.25);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 10px;
+        }
+
+        /* Custom Dropdown */
+        .custom-select-wrapper {
+            position: relative;
+            user-select: none;
+            width: 100%;
+            margin-bottom: 16px;
+        }
+        .custom-select-trigger {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 12px;
+            font-size: 16px;
+            background: transparent;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .custom-select.open .custom-select-trigger {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(0, 121, 107, 0.1);
+        }
+        .custom-select.open .material-icons {
+            transform: rotate(180deg);
+            transition: transform 0.3s;
+        }
+        .custom-options {
+            position: absolute;
+            display: block;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            margin-top: 8px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 100;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .custom-select.open .custom-options {
+            opacity: 1;
+            visibility: visible;
+        }
+        .custom-option {
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .custom-option:hover {
+            background: #f0f5f4;
+            color: var(--primary);
+        }
+
+        /* Toast Notification */
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: fixed;
+            z-index: 3000;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%) translateY(20px);
+            font-size: 15px;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: inherit;
+        }
+        .toast.show {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            bottom: 90px;
+        }
+        .toast.success { background-color: var(--success); }
+        .toast.error { background-color: var(--danger); }
+        .toast.info { background-color: var(--primary); }
+
+        /* Result Box */
+        .result-box {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-radius: 12px;
+            border: 1px solid #a5d6a7;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-title {
+            font-size: 13px;
+            color: #2e7d32;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .result-value {
+            font-size: 42px;
+            font-weight: 800;
+            color: #1b5e20;
+            margin: 5px 0;
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.6);
+            line-height: 1.1;
+        }
+
+        .result-value small {
+            font-size: 20px;
+            font-weight: 700;
+            color: #388e3c;
+        }
+
+        .result-subtitle {
+            font-size: 15px;
+            color: #2e7d32;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 8px;
+        }
+
+        /* Seed List (Inventory) */
+        .seed-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background-color: var(--card-bg);
+            border: 1px solid #f0f0f0;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            transition: all 0.2s ease;
+        }
+
+        .seed-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-color: #e0e0e0;
+            transform: translateY(-1px);
+        }
+
+        .seed-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .seed-info strong {
+            font-size: 17px;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .seed-info span {
+            font-size: 13px;
+            color: var(--primary-dark);
+            font-weight: 600;
+            background-color: #e8f5e9;
+            padding: 4px 8px;
+            border-radius: 20px;
+            display: inline-block;
+            width: fit-content;
+        }
+
+        .seed-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 8px;
+            color: var(--text-light);
+            transition: all 0.2s;
+            font-size: 20px;
+            background-color: #f9f9f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .edit-btn:hover { color: #1976d2; background-color: #e3f2fd; }
+        .delete-btn:hover { color: var(--danger); background-color: #ffebee; }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            display: flex;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            border-top: 1px solid #ddd;
+        }
+
+        .nav-item {
+            flex: 1;
+            padding: 12px 0;
+            text-align: center;
+            color: var(--text-light);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--text-light);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 24px;
+            padding: 0;
+            width: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <div class="header">
+            <span class="material-icons">agriculture</span>
+            <h2>Agri Kendra</h2>
+        </div>
+
+        <!-- CALCULATOR VIEW -->
+        <div id="calculatorView" class="section active">
+            <div class="card">
+                <div class="custom-select-wrapper" onclick="toggleDropdown()">
+                    <div class="custom-select">
+                        <div class="custom-select-trigger">
+                            <span id="selectedSeedText">Select a Seed</span>
+                            <span class="material-icons">expand_more</span>
+                        </div>
+                        <div class="custom-options" id="customSeedOptions">
+                            <!-- Options populated by JS -->
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" id="calcSeedValue">
+                <input type="hidden" id="calcSeedName">
+            </div>
+
+            <div class="card">
+                <div class="form-floating" style="margin-bottom: 0;">
+                    <input type="number" id="moneyInput" placeholder=" " oninput="calculateWeight()">
+                    <label>Option 1: Enter Amount (₹)</label>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="form-floating" style="margin-bottom: 0;">
+                    <input type="number" id="weightInput" placeholder=" " oninput="calculatePrice()">
+                    <label>Option 2: Enter Weight (Grams)</label>
+                </div>
+            </div>
+
+            <div id="resultBox" class="result-box"></div>
+        </div>
+
+        <!-- MANAGE SEEDS VIEW -->
+        <div id="manageView" class="section">
+            <div class="card">
+                <h3 style="margin-top:0; margin-bottom: 16px;">Add New Seed</h3>
+                <div class="form-floating">
+                    <input type="text" id="seedNameInput" placeholder=" " onblur="translateToHindi('seedNameInput', 'seedNameHindiInput')">
+                    <label>Seed Name (e.g. Wheat)</label>
+                </div>
+                <div class="form-floating">
+                    <input type="text" id="seedNameHindiInput" placeholder=" ">
+                    <label>Hindi Name (Auto-translates)</label>
+                </div>
+                <div class="form-floating">
+                    <input type="number" id="seedRateInput" placeholder=" ">
+                    <label>Rate per KG (₹)</label>
+                </div>
+                <button onclick="saveNewSeed()" id="saveBtn">
+                    <span class="material-icons">add_circle</span> Add Seed
+                </button>
+            </div>
+
+            <div class="card">
+                <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+                    <button onclick="exportData()" class="btn-outline" style="flex: 1; padding: 8px; font-size: 14px; justify-content: center;">
+                        <span class="material-icons" style="font-size: 18px;">download</span> Export
+                    </button>
+                    <button onclick="document.getElementById('importFile').click()" class="btn-outline" style="flex: 1; padding: 8px; font-size: 14px; justify-content: center;">
+                        <span class="material-icons" style="font-size: 18px;">upload</span> Import
+                    </button>
+                    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+                </div>
+                <div class="form-floating" style="margin-bottom: 0;">
+                    <input type="text" id="searchInput" placeholder=" " onkeyup="renderSeedList()">
+                    <label>Search seeds by name...</label>
+                </div>
+            </div>
+
+            <div class="card" style="padding: 0;">
+                <div id="seedList">
+                    <!-- Seed list populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- EDIT SEED MODAL -->
+        <div id="editModal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Edit Seed</h3>
+                    <button class="modal-close" onclick="closeEditModal()">&times;</button>
+                </div>
+                <input type="hidden" id="modalEditSeedId">
+                <div class="form-floating">
+                    <input type="text" id="modalSeedNameInput" placeholder=" " onblur="translateToHindi('modalSeedNameInput', 'modalSeedNameHindiInput')">
+                    <label>Seed Name</label>
+                </div>
+                <div class="form-floating">
+                    <input type="text" id="modalSeedNameHindiInput" placeholder=" ">
+                    <label>Hindi Name</label>
+                </div>
+                <div class="form-floating">
+                    <input type="number" id="modalSeedRateInput" placeholder=" ">
+                    <label>Rate per KG (₹)</label>
+                </div>
+                <button onclick="updateSeedFromModal()">
+                    <span class="material-icons">save</span> Update Seed
+                </button>
+            </div>
+        </div>
+
+        <!-- TOAST NOTIFICATION -->
+        <div id="toastBox" class="toast">
+            <span class="material-icons" id="toastIcon">info</span>
+            <span id="toastMessage">Message</span>
+        </div>
+
+        <!-- BOTTOM NAVIGATION -->
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('calculator')">
+                <span class="material-icons">calculate</span>
+                Calculator
+            </div>
+            <div class="nav-item" onclick="switchTab('manage')">
+                <span class="material-icons">inventory_2</span>
+                Manage Seeds
+            </div>
+        </div>
+
+        <!-- CUSTOM ALERT MODAL -->
+        <div id="customAlertModal" class="modal-overlay" style="z-index: 2000;">
+            <div class="modal-content" style="max-width: 320px; text-align: center;">
+                <div class="modal-header" style="justify-content: center; margin-bottom: 10px;">
+                    <span class="material-icons" id="customAlertIcon" style="font-size: 48px; color: var(--danger);">error_outline</span>
+                </div>
+                <h3 id="customAlertTitle" style="margin-top: 0; margin-bottom: 10px; font-size: 18px;">Error</h3>
+                <p id="customAlertMessage" style="color: var(--text-light); margin-bottom: 20px;">Message goes here</p>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button id="customAlertCancelBtn" class="btn-outline" style="display: none; padding: 10px; font-size: 14px;" onclick="closeCustomAlert(false)">Cancel</button>
+                    <button id="customAlertOkBtn" style="padding: 10px; font-size: 14px;" onclick="closeCustomAlert(true)">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- TOAST & CONFIRM LOGIC ---
+        let confirmCallback = null;
+
+        function customAlert(message, type = 'error') {
+            const toast = document.getElementById('toastBox');
+            const icon = document.getElementById('toastIcon');
+            document.getElementById('toastMessage').innerText = message;
+            
+            toast.className = 'toast show ' + type;
+            if (type === 'success') icon.innerText = 'check_circle';
+            else if (type === 'error') icon.innerText = 'error';
+            else icon.innerText = 'info';
+
+            setTimeout(() => {
+                toast.className = toast.className.replace('show', '');
+            }, 3000);
+        }
+
+        function customConfirm(message, callback) {
+            const modal = document.getElementById('customAlertModal');
+            document.getElementById('customAlertMessage').innerText = message;
+            document.getElementById('customAlertCancelBtn').style.display = 'block';
+            
+            const icon = document.getElementById('customAlertIcon');
+            const title = document.getElementById('customAlertTitle');
+            
+            icon.innerText = 'help_outline';
+            icon.style.color = 'var(--primary)';
+            title.innerText = 'Confirm';
+            
+            confirmCallback = callback;
+            modal.classList.add('active');
+        }
+
+        function closeCustomAlert(isConfirmAction = false) {
+            document.getElementById('customAlertModal').classList.remove('active');
+            if (isConfirmAction && confirmCallback) {
+                confirmCallback();
+            }
+        }
+
+        // Data Management (Local Storage)
+        let seeds = JSON.parse(localStorage.getItem('agri_seeds')) || [];
+
+        // Initialize App
+        window.onload = () => {
+            refreshUI();
+        };
+
+        function saveToStorage() {
+            localStorage.setItem('agri_seeds', JSON.stringify(seeds));
+            refreshUI();
+        }
+
+        function refreshUI() {
+            renderDropdown();
+            renderSeedList();
+        }
+
+        // Switch Tabs
+        function switchTab(tabName) {
+            document.getElementById('calculatorView').classList.remove('active');
+            document.getElementById('manageView').classList.remove('active');
+
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems[0].classList.remove('active');
+            navItems[1].classList.remove('active');
+
+            document.getElementById('resultBox').style.display = 'none';
+            clearInputs();
+
+            if (tabName === 'calculator') {
+                document.getElementById('calculatorView').classList.add('active');
+                navItems[0].classList.add('active');
+            } else {
+                document.getElementById('manageView').classList.add('active');
+                navItems[1].classList.add('active');
+            }
+        }
+
+        // --- MANAGE SEEDS LOGIC ---
+        async function translateToHindi(sourceId, targetId) {
+            const englishText = document.getElementById(sourceId).value.trim();
+            if (!englishText) return;
+            
+            try {
+                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=hi&dt=t&q=${encodeURIComponent(englishText)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                const hindiText = data[0][0][0];
+                document.getElementById(targetId).value = hindiText;
+            } catch (error) {
+                console.error("Translation failed:", error);
+            }
+        }
+
+        function saveNewSeed() {
+            const nameInput = document.getElementById('seedNameInput');
+            const hindiInput = document.getElementById('seedNameHindiInput');
+            const rateInput = document.getElementById('seedRateInput');
+            
+            const name = nameInput.value.trim();
+            const hindiName = hindiInput.value.trim();
+            const rate = parseFloat(rateInput.value);
+
+            if (!name || isNaN(rate) || rate <= 0) {
+                customAlert("Please enter a valid seed name and rate!");
+                return;
+            }
+
+            const newSeed = {
+                id: Date.now().toString(),
+                name: name,
+                hindiName: hindiName,
+                rate: rate
+            };
+
+            seeds.push(newSeed);
+            saveToStorage();
+            
+            nameInput.value = '';
+            hindiInput.value = '';
+            rateInput.value = '';
+            
+            customAlert("Seed added successfully!", "success");
+            refreshUI();
+        }
+
+        function editSeed(id) {
+            const seed = seeds.find(s => s.id === id);
+            if (!seed) return;
+            
+            document.getElementById('modalEditSeedId').value = seed.id;
+            document.getElementById('modalSeedNameInput').value = seed.name;
+            document.getElementById('modalSeedNameHindiInput').value = seed.hindiName || '';
+            document.getElementById('modalSeedRateInput').value = seed.rate;
+            
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+        }
+
+        function updateSeedFromModal() {
+            const id = document.getElementById('modalEditSeedId').value;
+            const newName = document.getElementById('modalSeedNameInput').value.trim();
+            const newHindiName = document.getElementById('modalSeedNameHindiInput').value.trim();
+            const newRate = parseFloat(document.getElementById('modalSeedRateInput').value);
+
+            if (!newName || isNaN(newRate) || newRate <= 0) {
+                customAlert("Please enter a valid seed name and rate!");
+                return;
+            }
+
+            const index = seeds.findIndex(s => s.id === id);
+            if (index !== -1) {
+                seeds[index].name = newName;
+                seeds[index].hindiName = newHindiName;
+                seeds[index].rate = newRate;
+                saveToStorage();
+                closeEditModal();
+                customAlert("Seed updated successfully!", "success");
+                refreshUI();
+            }
+        }
+
+        function deleteSeed(id) {
+            customConfirm("Are you sure you want to delete this seed?", () => {
+                seeds = seeds.filter(s => s.id !== id);
+                saveToStorage();
+            });
+        }
+
+        function renderSeedList() {
+            const listDiv = document.getElementById('seedList');
+            const searchInput = document.getElementById('searchInput');
+            const searchTerm = searchInput ? searchInput.value.toLowerCase() : "";
+            listDiv.innerHTML = "";
+
+            const filteredSeeds = seeds.filter(seed => {
+                const nameMatch = seed.name.toLowerCase().includes(searchTerm);
+                const hindiMatch = seed.hindiName && seed.hindiName.toLowerCase().includes(searchTerm);
+                return nameMatch || hindiMatch;
+            });
+
+            if (filteredSeeds.length === 0) {
+                listDiv.innerHTML = `<div class="empty-state">
+                    <span class="material-icons">search_off</span>
+                    <p>No matching seeds found.</p>
+                </div>`;
+                return;
+            }
+
+            filteredSeeds.forEach(seed => {
+                const displayName = seed.hindiName ? `${seed.name} / ${seed.hindiName}` : seed.name;
+                listDiv.innerHTML += `
+                    <div class="seed-item">
+                        <div class="seed-info">
+                            <strong>${displayName}</strong>
+                            <span>₹${seed.rate} per KG</span>
+                        </div>
+                        <div class="seed-actions">
+                            <span class="material-icons action-btn edit-btn" onclick="editSeed('${seed.id}')">edit</span>
+                            <span class="material-icons action-btn delete-btn" onclick="deleteSeed('${seed.id}')">delete</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // --- CALCULATOR LOGIC ---
+
+        // Custom Dropdown Logic
+        function toggleDropdown() {
+            document.querySelector('.custom-select').classList.toggle('open');
+        }
+
+        window.addEventListener('click', function(e) {
+            const select = document.querySelector('.custom-select');
+            if (select && !select.contains(e.target)) {
+                select.classList.remove('open');
+            }
+        });
+
+        function selectOption(event, value, nameText, name) {
+            if (event) event.stopPropagation();
+            document.getElementById('selectedSeedText').innerText = nameText;
+            document.getElementById('calcSeedValue').value = value;
+            document.getElementById('calcSeedName').value = name;
+            document.querySelector('.custom-select').classList.remove('open');
+            recalculate();
+        }
+
+        function renderDropdown() {
+            const optionsDiv = document.getElementById('customSeedOptions');
+            const triggerText = document.getElementById('selectedSeedText');
+            optionsDiv.innerHTML = "";
+
+            if (seeds.length === 0) {
+                triggerText.innerText = "Please add seeds in Manage tab";
+                document.getElementById('calcSeedValue').value = "";
+                return;
+            }
+
+            triggerText.innerText = "Select a Seed";
+            document.getElementById('calcSeedValue').value = "";
+
+            seeds.forEach(seed => {
+                const displayName = seed.hindiName ? `${seed.name} / ${seed.hindiName}` : seed.name;
+                optionsDiv.innerHTML += `
+                    <div class="custom-option" onclick="selectOption(event, '${seed.rate}', '${displayName} (₹${seed.rate}/kg)', '${displayName}')">
+                        ${displayName} <small style="color:var(--text-light); font-weight:normal;">₹${seed.rate}/kg</small>
+                    </div>`;
+            });
+        }
+
+        function recalculate() {
+            if (document.getElementById('moneyInput').value) {
+                calculateWeight();
+            } else if (document.getElementById('weightInput').value) {
+                calculatePrice();
+            } else {
+                document.getElementById('resultBox').style.display = 'none';
+            }
+        }
+
+        function calculateWeight() {
+            const resultBox = document.getElementById('resultBox');
+            if (seeds.length === 0) {
+                resultBox.style.display = 'none';
+                return;
+            }
+
+            document.getElementById('weightInput').value = ""; // Clear other input
+            
+            const ratePerKg = parseFloat(document.getElementById('calcSeedValue').value);
+            const seedName = document.getElementById('calcSeedName').value;
+            const moneyStr = document.getElementById('moneyInput').value;
+            
+            if (!ratePerKg) {
+                customAlert("Please select a seed first!", "info");
+                resultBox.style.display = 'none';
+                return;
+            }
+
+            const money = parseFloat(moneyStr);
+
+            if (!moneyStr || isNaN(money) || money <= 0) {
+                resultBox.style.display = 'none';
+                return;
+            }
+
+            const grams = (money / ratePerKg) * 1000;
+
+            let displayValue, displayUnit;
+            if (grams >= 1000) {
+                displayValue = (grams / 1000).toFixed(2);
+                displayUnit = 'KG';
+            } else {
+                displayValue = grams.toFixed(2);
+                displayUnit = 'Grams';
+            }
+
+            resultBox.innerHTML = `
+                <div class="result-title">
+                    <span class="material-icons" style="font-size: 18px;">scale</span> Weight to Give
+                </div>
+                <div class="result-value">${displayValue} <small>${displayUnit}</small></div>
+                <div class="result-subtitle">For ₹${money} of <b>${seedName}</b></div>
+            `;
+            resultBox.style.display = 'block';
+        }
+
+        function calculatePrice() {
+            const resultBox = document.getElementById('resultBox');
+            if (seeds.length === 0) {
+                resultBox.style.display = 'none';
+                return;
+            }
+
+            document.getElementById('moneyInput').value = ""; // Clear other input
+            
+            const ratePerKg = parseFloat(document.getElementById('calcSeedValue').value);
+            const seedName = document.getElementById('calcSeedName').value;
+            const gramsStr = document.getElementById('weightInput').value;
+            
+            if (!ratePerKg) {
+                customAlert("Please select a seed first!", "info");
+                resultBox.style.display = 'none';
+                return;
+            }
+
+            const grams = parseFloat(gramsStr);
+
+            if (!gramsStr || isNaN(grams) || grams <= 0) {
+                resultBox.style.display = 'none';
+                return;
+            }
+
+            const totalMoney = ((grams / 1000) * ratePerKg).toFixed(2);
+            
+            resultBox.innerHTML = `
+                <div class="result-title">
+                    <span class="material-icons" style="font-size: 18px;">payments</span> Amount to Collect
+                </div>
+                <div class="result-value"><small>₹</small>${totalMoney}</div>
+                <div class="result-subtitle">For ${grams}g of <b>${seedName}</b></div>
+            `;
+            resultBox.style.display = 'block';
+        }
+
+        function clearInputs() {
+            document.getElementById('moneyInput').value = "";
+            document.getElementById('weightInput').value = "";
+        }
+
+        // --- DATA BACKUP LOGIC ---
+        function exportData() {
+            if (seeds.length === 0) {
+                customAlert("No data to export!", "info");
+                return;
+            }
+            const dataStr = JSON.stringify(seeds, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "agri_kendra_backup.json";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedSeeds = JSON.parse(e.target.result);
+                    if (Array.isArray(importedSeeds)) {
+                        seeds = importedSeeds;
+                        saveToStorage();
+                        customAlert("Backup imported successfully!", "success");
+                    } else {
+                        customAlert("Invalid backup file format!");
+                    }
+                } catch (error) {
+                    customAlert("Error reading backup file!");
+                }
+                event.target.value = ""; // Reset file input
+            };
+            reader.readAsText(file);
+        }
+
+        // --- PWA SERVICE WORKER ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then(registration => {
+                    console.log('SW registered: ', registration);
+                }).catch(err => {
+                    console.log('SW registration failed: ', err);
+                });
+            });
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "Agri Kendra Calculator",
+  "short_name": "Agri Kendra",
+  "description": "Seed price and weight calculator for Agri Shops.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f0f2f5",
+  "theme_color": "#00796b",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
